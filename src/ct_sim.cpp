@@ -21,7 +21,7 @@ CtSim::CtSim(const std::string& imagePath, size_t angles) : m_numAngles{ angles 
   spdlog::info("Image Size: {}, Radius: {}", m_imageSize, m_radius);
 
   m_projections = cv::Mat(
-    static_cast<int32_t>(m_numAngles), static_cast<int32_t>(m_imageSize), CV_64F, cv::Scalar(0)
+    static_cast<int32_t>(m_imageSize), static_cast<int32_t>(m_numAngles), CV_64F, cv::Scalar(0)
   );
   spdlog::info(
     "Initialized projections matrix with size: {}x{}", m_projections.rows, m_projections.cols
@@ -120,14 +120,14 @@ auto CtSim::simulateRayColumn(const dvec2& c, const dvec2& a, const size_t col) 
   for (size_t i = 0; i < m_imageSize; i++) {
     double projection =
       traceRay(tc + td * (static_cast<double>(i) - static_cast<double>(m_imageSize) / 2.0), an);
-    if (col < static_cast<size_t>(m_projections.rows)
-        && i < static_cast<size_t>(m_projections.cols))
+    if (i < static_cast<size_t>(m_projections.rows)
+        && col < static_cast<size_t>(m_projections.cols))
     {
       m_projections.at<double>(i, col) = projection;
-      spdlog::debug("Projection[{}, {}] = {:.4f}", col, i, projection);
+      spdlog::debug("Projection[{}, {}] = {:.4f}", i, col, projection);
     }
     else {
-      spdlog::error("Projection index out of bounds for [{}, {}]", col, i);
+      spdlog::error("Projection index out of bounds for [{}, {}]", i, col);
     }
   }
 }
