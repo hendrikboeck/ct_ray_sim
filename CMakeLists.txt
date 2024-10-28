@@ -51,6 +51,7 @@ find_package(spdlog REQUIRED)
 if(spdlog_FOUND)
     message(STATUS "Found spdlog version ${spdlog_VERSION}")
     include_directories(${spdlog_INCLUDE_DIRS})
+    target_compile_definitions(ct_ray_sim PRIVATE SPDLOG_FMT_EXTERNAL)
     target_link_libraries(ct_ray_sim spdlog::spdlog)
 else()
     message(FATAL_ERROR "spdlog not found. Please install spdlog.")
@@ -67,4 +68,17 @@ if(argparse_FOUND)
     target_link_libraries(ct_ray_sim argparse::argparse)
 else()
     message(FATAL_ERROR "argparse not found. Please install argparse.")
+endif()
+
+# ----------------------------------
+# fmt
+# ----------------------------------
+find_package(fmt REQUIRED)
+
+if(fmt_FOUND)
+    message(STATUS "Found fmt version ${fmt_VERSION}")
+    include_directories(${fmt_INCLUDE_DIRS})
+    target_link_libraries(ct_ray_sim fmt::fmt)
+else()
+    message(FATAL_ERROR "fmt not found. Please install fmt.")
 endif()

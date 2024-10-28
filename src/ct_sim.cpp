@@ -1,7 +1,6 @@
 #include "ct_sim.h"
 
-// #define SPDLOG_FMT_EXTERNAL
-// #define SPDLOG_USE_STD_FORMAT
+#include <fmt/core.h>
 #include <spdlog/spdlog.h>
 
 #include <cmath>
@@ -14,7 +13,7 @@ using glm::dvec2;
 using std::size_t;
 namespace fs = std::filesystem;
 
-CtSim::CtSim(const std::string& imagePath, size_t angles) : m_numAngles{ angles } {
+Simulation::Simulation(const std::string& imagePath, size_t angles) : m_numAngles{ angles } {
   spdlog::info("Initializing CtSim with imagePath: {} and angles: {}", imagePath, m_numAngles);
   loadDensityMap(imagePath);
   m_radius = static_cast<double>(m_imageSize) / 2.0;
@@ -28,7 +27,7 @@ CtSim::CtSim(const std::string& imagePath, size_t angles) : m_numAngles{ angles 
   );
 }
 
-auto CtSim::loadDensityMap(const std::string& imagePath) -> void {
+auto Simulation::loadDensityMap(const std::string& imagePath) -> void {
   spdlog::info("Loading image from: {}", imagePath);
   m_densityMap = cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
 
@@ -71,7 +70,7 @@ auto CtSim::loadDensityMap(const std::string& imagePath) -> void {
   }
 }
 
-auto CtSim::getDensity(size_t x, size_t y) const -> double {
+auto Simulation::getDensity(size_t x, size_t y) const -> double {
   if (x >= m_imageSize || y >= m_imageSize) {
     spdlog::warn("Access out of bounds at ({}, {}), returning 0.0", x, y);
     return 0.0;
@@ -81,7 +80,7 @@ auto CtSim::getDensity(size_t x, size_t y) const -> double {
   return density;
 }
 
-auto CtSim::run() -> void {
+auto Simulation::run() -> void {
   spdlog::info("Starting CT simulation with {} angles.", m_numAngles);
   const auto center = dvec2{ 1.0, 1.0 } * m_radius;
   const auto baseVec = dvec2{ 1.0, 0.0 } * (m_radius - 1.0);
@@ -102,7 +101,7 @@ auto CtSim::run() -> void {
   spdlog::info("CT simulation completed.");
 }
 
-auto CtSim::simulateRayColumn(const dvec2& c, const dvec2& a, const size_t col) -> void {
+auto Simulation::simulateRayColumn(const dvec2& c, const dvec2& a, const size_t col) -> void {
   spdlog::debug("Simulating ray column {}", col);
   const auto tc = c + a;
   const auto td = glm::normalize(dvec2{ -a.y, a.x });
@@ -132,7 +131,8 @@ auto CtSim::simulateRayColumn(const dvec2& c, const dvec2& a, const size_t col) 
   }
 }
 
-auto CtSim::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direction) const -> double {
+auto Simulation::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direction) const
+  -> double {
   spdlog::trace(
     "Tracing ray from ({:.2f}, {:.2f}) in direction ({:.2f}, {:.2f})",
     startPoint.x,
@@ -250,7 +250,7 @@ auto CtSim::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direction) 
   return total_density;
 }
 
-auto CtSim::saveProjectionImage(const std::string& outputDir) const -> void {
+auto Simulation::saveProjectionImage(const std::string& outputDir) const -> void {
   spdlog::info("Starting reconstruction of the image from projections.");
 
   cv::Mat reconstructedImage(

@@ -1,5 +1,3 @@
-// #define SPDLOG_FMT_EXTERNAL
-// #define SPDLOG_USE_STD_FORMAT
 #include <spdlog/spdlog.h>
 
 #include <argparse/argparse.hpp>
@@ -51,7 +49,7 @@ auto main(int argc, char* argv[]) -> int {
   );
 
   // Run CT simulation
-  auto sim = CtSim(inputPath, numAngles);
+  auto sim = Simulation(inputPath, numAngles);
   sim.run();
   sim.saveProjectionImage(outputPath);
 

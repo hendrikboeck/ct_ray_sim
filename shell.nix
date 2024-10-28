@@ -10,9 +10,10 @@ pkgs.mkShell {
     glm
     cmake
     opencv
+    fmt
+    argparse
     pkg-config
     git
-    argparse
   ];
 
   shellHook = ''
@@ -31,12 +32,6 @@ pkgs.mkShell {
 
     # Extract include paths for OpenCV and glm
     opencv_include=$(pkg-config --cflags-only-I opencv4 | sed 's/-I//g' | tr ' ' '\n')
-    glm_include="${pkgs.glm}/include"
-    spdlog_include="${pkgs.spdlog.dev}/include"
-    argparse_include="${pkgs.argparse}/include"
-
-    # Create a JSON array of the paths
-    include_paths=$(printf '["include", "%s", "%s", "%s", "%s"]\n' "$opencv_include" "$glm_include" "$spdlog_include" "$argparse_include")
 
     # Update c_cpp_properties.json
     mkdir -p .vscode
@@ -45,8 +40,17 @@ pkgs.mkShell {
       "configurations": [
         {
           "name": "Nix",
-          "includePath": $include_paths,
-          "defines": [],
+          "includePath": [
+            "include",
+            "$(pkg-config --cflags-only-I opencv4 | sed 's/-I//g' | tr ' ' '\n')",
+            "${pkgs.glm}/include",
+            "${pkgs.spdlog.dev}/include",
+            "${pkgs.argparse}/include",
+            "${pkgs.fmt.dev}/include"
+          ],
+          "defines": [
+            "SPDLOG_FMT_EXTERNAL"
+          ],
           "compilerPath": "$CXX",
           "cStandard": "c11",
           "cppStandard": "c++20",

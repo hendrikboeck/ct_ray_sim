@@ -1,5 +1,5 @@
-#ifndef CTSCANSIMULATOR_H
-#define CTSCANSIMULATOR_H
+#ifndef _SIMULATION_H
+#define _SIMULATION_H
 
 #include <cstdint>
 #include <glm/glm.hpp>
@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-class CtSim {
+class Simulation {
 private:
   cv::Mat m_densityMap;
   cv::Mat m_projections;
@@ -22,9 +22,9 @@ private:
   auto loadDensityMap(const std::string& imagePath) -> void;
 
 public:
-  explicit CtSim(const std::string& imagePath, std::size_t angles);
+  explicit Simulation(const std::string& imagePath, std::size_t numAngles);
   auto run() -> void;
   auto saveProjectionImage(const std::string& outputDir) const -> void;
 };
 
-#endif  // CTSCANSIMULATOR_H
+#endif  // _SIMULATION_H
