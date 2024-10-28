@@ -5,12 +5,14 @@
 #include <spdlog/spdlog.h>
 
 #include <cmath>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 
 using glm::dmat2;
 using glm::dvec2;
 using std::size_t;
+namespace fs = std::filesystem;
 
 CtSim::CtSim(const std::string& imagePath, size_t angles) : m_numAngles{ angles } {
   spdlog::info("Initializing CtSim with imagePath: {} and angles: {}", imagePath, m_numAngles);
@@ -50,16 +52,16 @@ auto CtSim::loadDensityMap(const std::string& imagePath) -> void {
   m_imageSize = static_cast<size_t>(m_densityMap.rows);
   spdlog::info("Image size set to: {}x{}", m_imageSize, m_imageSize);
 
-  spdlog::info("Sample density values (limited to 10x10, centered):");
-  const auto center = m_imageSize / 2.0;
-  for (size_t y = center - 5; y < center + 5; y++) {
-    std::string row;
-    for (size_t x = center - 5; x < center + 5; x++)
-      row += fmt::format("{:.2f} ", m_densityMap.at<double>(y, x));
-    spdlog::info("{}", row);
-  }
-
   if (spdlog::get_level() <= spdlog::level::debug) {
+    spdlog::debug("Sample density values (limited to 10x10, centered):");
+    const auto center = m_imageSize / 2.0;
+    for (size_t y = center - 5; y < center + 5; y++) {
+      std::string row;
+      for (size_t x = center - 5; x < center + 5; x++)
+        row += fmt::format("{:.2f} ", m_densityMap.at<double>(y, x));
+      spdlog::debug("{}", row);
+    }
+
     cv::Mat density_display;
     m_densityMap.convertTo(density_display, CV_8U, 255.0);
     if (cv::imwrite("debug_density_map.png", density_display))
@@ -75,7 +77,7 @@ auto CtSim::getDensity(size_t x, size_t y) const -> double {
     return 0.0;
   }
   double density = m_densityMap.at<double>(y, x);
-  spdlog::debug("Density at ({}, {}): {:.4f}", x, y, density);
+  spdlog::trace("Density at ({}, {}): {:.4f}", x, y, density);
   return density;
 }
 
@@ -118,7 +120,9 @@ auto CtSim::simulateRayColumn(const dvec2& c, const dvec2& a, const size_t col) 
   for (size_t i = 0; i < m_imageSize; i++) {
     double projection =
       traceRay(tc + td * (static_cast<double>(i) - static_cast<double>(m_imageSize) / 2.0), an);
-    if (col < m_projections.rows && i < m_projections.cols) {
+    if (col < static_cast<size_t>(m_projections.rows)
+        && i < static_cast<size_t>(m_projections.cols))
+    {
       m_projections.at<double>(i, col) = projection;
       spdlog::debug("Projection[{}, {}] = {:.4f}", col, i, projection);
     }
@@ -129,7 +133,7 @@ auto CtSim::simulateRayColumn(const dvec2& c, const dvec2& a, const size_t col) 
 }
 
 auto CtSim::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direction) const -> double {
-  spdlog::debug(
+  spdlog::trace(
     "Tracing ray from ({:.2f}, {:.2f}) in direction ({:.2f}, {:.2f})",
     startPoint.x,
     startPoint.y,
@@ -154,7 +158,7 @@ auto CtSim::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direction) 
     tmax = std::min(tmax, tmax_x);
   }
   else if (startPoint.x < xmin || startPoint.x > xmax) {
-    spdlog::debug("Ray is parallel to x-axis and outside image bounds. Returning 0.0");
+    spdlog::trace("Ray is parallel to x-axis and outside image bounds. Returning 0.0");
     return 0.0;
   }
 
@@ -167,24 +171,24 @@ auto CtSim::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direction) 
     tmax = std::min(tmax, tmax_y);
   }
   else if (startPoint.y < ymin || startPoint.y > ymax) {
-    spdlog::debug("Ray is parallel to y-axis and outside image bounds. Returning 0.0");
+    spdlog::trace("Ray is parallel to y-axis and outside image bounds. Returning 0.0");
     return 0.0;
   }
 
   if (tmax < tmin || tmax < 0.0) {
-    spdlog::debug("No valid intersection with image boundaries. Returning 0.0");
+    spdlog::trace("No valid intersection with image boundaries. Returning 0.0");
     return 0.0;
   }
 
   double t_start = std::max(tmin, 0.0);
   double t_end = tmax;
 
-  spdlog::debug(
+  spdlog::trace(
     "Integrating from t_start={:.4f} to t_end={:.4f} across image boundaries.", t_start, t_end
   );
 
   const double delta_t = 0.5;
-  spdlog::debug("Using delta_t={:.4f} for integration.", delta_t);
+  spdlog::trace("Using delta_t={:.4f} for integration.", delta_t);
 
   double total_density = 0.0;
 
@@ -200,7 +204,7 @@ auto CtSim::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direction) 
     {
       double density = getDensity(static_cast<size_t>(x), static_cast<size_t>(y));
       total_density += density * delta_t;
-      spdlog::debug(
+      spdlog::trace(
         "Accumulated density: {:.4f} * {:.4f} = {:.4f}, Total Density: {:.4f}",
         density,
         delta_t,
@@ -209,7 +213,7 @@ auto CtSim::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direction) 
       );
     }
     else {
-      spdlog::debug("Point ({}, {}) is out of bounds. Skipping.", x, y);
+      spdlog::trace("Point ({}, {}) is out of bounds. Skipping.", x, y);
     }
 
     t += delta_t;
@@ -228,7 +232,7 @@ auto CtSim::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direction) 
       {
         double density = getDensity(static_cast<size_t>(x), static_cast<size_t>(y));
         total_density += density * remaining;
-        spdlog::debug(
+        spdlog::trace(
           "Accumulated density (partial step): {:.4f} * {:.4f} = {:.4f}, Total Density: {:.4f}",
           density,
           remaining,
@@ -237,16 +241,16 @@ auto CtSim::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direction) 
         );
       }
       else {
-        spdlog::debug("Partial step point ({}, {}) is out of bounds. Skipping.", x, y);
+        spdlog::trace("Partial step point ({}, {}) is out of bounds. Skipping.", x, y);
       }
     }
   }
 
-  spdlog::debug("Final Total Density: {:.4f}", total_density);
+  spdlog::trace("Final Total Density: {:.4f}", total_density);
   return total_density;
 }
 
-auto CtSim::saveProjectionImage(const std::string& outputPath) const -> void {
+auto CtSim::saveProjectionImage(const std::string& outputDir) const -> void {
   spdlog::info("Starting reconstruction of the image from projections.");
 
   cv::Mat reconstructedImage(
@@ -307,25 +311,33 @@ auto CtSim::saveProjectionImage(const std::string& outputPath) const -> void {
   reconstructedImage.convertTo(reconstructedImage8U, CV_8U, 255.0);
   spdlog::info("Reconstructed image converted to 8-bit format.");
 
-  cv::Mat tanhMappedImage = reconstructedImage.clone();
-  double scaleFactor = 3.0;
-
   cv::Mat reconstructedImage16U;
   reconstructedImage.convertTo(reconstructedImage16U, CV_16U, 65535.0);
   spdlog::info("Reconstructed image converted to 16-bit format.");
 
-  if (cv::imwrite(outputPath, reconstructedImage8U))
-    spdlog::info("Reconstructed image saved to '{}'.", outputPath);
-  else
-    spdlog::error("Failed to save reconstructed image to '{}'.", outputPath);
+  if (!fs::exists(outputDir)) {
+    if (!fs::create_directory(outputDir)) {
+      spdlog::error("Failed to create output directory: {}", outputDir);
+      throw std::runtime_error("Failed to create output directory.");
+    }
+    spdlog::info("Created output directory: {}", outputDir);
+  }
 
-  if (cv::imwrite("reconstructed_16bit.png", reconstructedImage16U))
-    spdlog::info("Saved reconstructed image as 'reconstructed_16bit.png'.");
+  const auto simPath = std::string(fs::path(outputDir) / "simulation.png");
+  if (cv::imwrite(simPath, reconstructedImage8U))
+    spdlog::info("Reconstructed image saved to '{}'.", simPath);
   else
-    spdlog::error("Failed to save reconstructed image as 'reconstructed_16bit.png'.");
+    spdlog::error("Failed to save reconstructed image to '{}'.", simPath);
 
-  if (cv::imwrite("scan_array.png", m_projections))
-    spdlog::info("Saved scan array as 'scan_array.png'.");
+  const auto sim16bitPath = std::string(fs::path(outputDir) / "simulation_16bit.png");
+  if (cv::imwrite(sim16bitPath, reconstructedImage16U))
+    spdlog::info("Reconstructed 16bit image saved to '{}'.", sim16bitPath);
   else
-    spdlog::error("Failed to save scan array as 'scan_array.png'.");
+    spdlog::error("Failed to save reconstructed 16bit image to '{}'.", sim16bitPath);
+
+  const auto scanArrayPath = std::string(fs::path(outputDir) / "scan_array.png");
+  if (cv::imwrite(scanArrayPath, m_projections))
+    spdlog::info("Scan array saved to '{}'.", scanArrayPath);
+  else
+    spdlog::error("Failed to save scan array to '{}'.", scanArrayPath);
 }

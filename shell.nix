@@ -12,6 +12,7 @@ pkgs.mkShell {
     opencv
     pkg-config
     git
+    argparse
   ];
 
   shellHook = ''
@@ -32,9 +33,10 @@ pkgs.mkShell {
     opencv_include=$(pkg-config --cflags-only-I opencv4 | sed 's/-I//g' | tr ' ' '\n')
     glm_include="${pkgs.glm}/include"
     spdlog_include="${pkgs.spdlog.dev}/include"
+    argparse_include="${pkgs.argparse}/include"
 
     # Create a JSON array of the paths
-    include_paths=$(printf '["include", "%s", "%s", "%s"]\n' "$opencv_include" "$glm_include" "$spdlog_include")
+    include_paths=$(printf '["include", "%s", "%s", "%s", "%s"]\n' "$opencv_include" "$glm_include" "$spdlog_include" "$argparse_include")
 
     # Update c_cpp_properties.json
     mkdir -p .vscode

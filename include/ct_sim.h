@@ -24,7 +24,7 @@ private:
 public:
   explicit CtSim(const std::string& imagePath, std::size_t angles);
   auto run() -> void;
-  auto saveProjectionImage(const std::string& outputPath) const -> void;
+  auto saveProjectionImage(const std::string& outputDir) const -> void;
 };
 
 #endif  // CTSCANSIMULATOR_H
