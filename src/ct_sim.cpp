@@ -3,10 +3,12 @@
 #include <fmt/core.h>
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <cmath>
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
+#include <ranges>
 
 using glm::dmat2;
 using glm::dvec2;
@@ -53,21 +55,23 @@ auto Simulation::loadDensityMap(const std::string& imagePath) -> void {
 
   if (spdlog::get_level() <= spdlog::level::debug) {
     spdlog::debug("Sample density values (limited to 10x10, centered):");
-    const auto center = m_imageSize / 2.0;
-    for (size_t y = center - 5; y < center + 5; y++) {
-      std::string row;
-      for (size_t x = center - 5; x < center + 5; x++)
+
+    const auto center = static_cast<int32_t>(m_imageSize / 2.0);
+    for (const auto y : std::views::iota(center - 5, center + 5)) {
+      auto row = std::string();
+      for (const auto x : std::views::iota(center - 5, center + 5))
         row += fmt::format("{:.2f} ", m_densityMap.at<double>(y, x));
       spdlog::debug("{}", row);
     }
-
-    cv::Mat density_display;
-    m_densityMap.convertTo(density_display, CV_8U, 255.0);
-    if (cv::imwrite("debug_density_map.png", density_display))
-      spdlog::info("Saved debug density map as 'debug_density_map.png'.");
-    else
-      spdlog::error("Failed to save debug density map as 'debug_density_map.png'.");
   }
+
+  auto density_display = cv::Mat();
+  m_densityMap.convertTo(density_display, CV_8U, 255.0);
+
+  if (cv::imwrite("debug_density_map.png", density_display))
+    spdlog::info("Saved debug density map as 'debug_density_map.png'.");
+  else
+    spdlog::error("Failed to save debug density map as 'debug_density_map.png'.");
 }
 
 auto Simulation::getDensity(size_t x, size_t y) const -> double {
@@ -75,25 +79,27 @@ auto Simulation::getDensity(size_t x, size_t y) const -> double {
     spdlog::warn("Access out of bounds at ({}, {}), returning 0.0", x, y);
     return 0.0;
   }
-  double density = m_densityMap.at<double>(y, x);
+
+  const auto density = m_densityMap.at<double>(y, x);
   spdlog::trace("Density at ({}, {}): {:.4f}", x, y, density);
+
   return density;
 }
 
 auto Simulation::run() -> void {
   spdlog::info("Starting CT simulation with {} angles.", m_numAngles);
-  const auto center = dvec2{ 1.0, 1.0 } * m_radius;
-  const auto baseVec = dvec2{ 1.0, 0.0 } * (m_radius - 1.0);
+  const auto center = dvec2(1.0, 1.0) * m_radius;
+  const auto baseVec = dvec2(1.0, 0.0) * (m_radius - 1.0);
   spdlog::info("Center: ({:.2f}, {:.2f})", center.x, center.y);
   spdlog::info("Base Vector: ({:.2f}, {:.2f})", baseVec.x, baseVec.y);
 
-  for (size_t i = 0; i < m_numAngles; i++) {
-    double angle_deg = static_cast<double>(i) * (360.0 / m_numAngles);
-    const auto angle = glm::radians(angle_deg);
+  for (const auto i : std::views::iota(size_t(0), m_numAngles)) {
+    const auto phi = static_cast<double>(i) * (360.0 / m_numAngles);
+    const auto angle = glm::radians(phi);
     const auto rot = dmat2(glm::cos(angle), -glm::sin(angle), glm::sin(angle), glm::cos(angle));
 
     const auto rv = baseVec * rot;
-    spdlog::debug("Angle {}: {:.2f} degrees ({:.4f} radians)", i, angle_deg, angle);
+    spdlog::debug("Angle {}: {:.2f} degrees ({:.4f} radians)", i, phi, angle);
     spdlog::debug("Rotated Vector: ({:.4f}, {:.4f})", rv.x, rv.y);
 
     simulateRayColumn(center, rv, i);
@@ -141,35 +147,39 @@ auto Simulation::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direct
     direction.y
   );
 
-  double tmin = -std::numeric_limits<double>::infinity();
-  double tmax = std::numeric_limits<double>::infinity();
+  auto tmin = -std::numeric_limits<double>::infinity();
+  auto tmax = std::numeric_limits<double>::infinity();
 
-  const double xmin = 0.0;
-  const double xmax = static_cast<double>(m_imageSize);
-  const double ymin = 0.0;
-  const double ymax = static_cast<double>(m_imageSize);
+  const auto xmin = 0.0;
+  const auto xmax = static_cast<double>(m_imageSize);
+  const auto ymin = 0.0;
+  const auto ymax = static_cast<double>(m_imageSize);
 
   if (direction.x != 0.0) {
-    double tx1 = (xmin - startPoint.x) / direction.x;
-    double tx2 = (xmax - startPoint.x) / direction.x;
-    double tmin_x = std::min(tx1, tx2);
-    double tmax_x = std::max(tx1, tx2);
+    const auto tx1 = (xmin - startPoint.x) / direction.x;
+    const auto tx2 = (xmax - startPoint.x) / direction.x;
+    const auto tmin_x = std::min(tx1, tx2);
+    const auto tmax_x = std::max(tx1, tx2);
+
     tmin = std::max(tmin, tmin_x);
     tmax = std::min(tmax, tmax_x);
   }
+
   else if (startPoint.x < xmin || startPoint.x > xmax) {
     spdlog::trace("Ray is parallel to x-axis and outside image bounds. Returning 0.0");
     return 0.0;
   }
 
   if (direction.y != 0.0) {
-    double ty1 = (ymin - startPoint.y) / direction.y;
-    double ty2 = (ymax - startPoint.y) / direction.y;
-    double tmin_y = std::min(ty1, ty2);
-    double tmax_y = std::max(ty1, ty2);
+    const auto ty1 = (ymin - startPoint.y) / direction.y;
+    const auto ty2 = (ymax - startPoint.y) / direction.y;
+    const auto tmin_y = std::min(ty1, ty2);
+    const auto tmax_y = std::max(ty1, ty2);
+
     tmin = std::max(tmin, tmin_y);
     tmax = std::min(tmax, tmax_y);
   }
+
   else if (startPoint.y < ymin || startPoint.y > ymax) {
     spdlog::trace("Ray is parallel to y-axis and outside image bounds. Returning 0.0");
     return 0.0;
@@ -180,8 +190,8 @@ auto Simulation::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direct
     return 0.0;
   }
 
-  double t_start = std::max(tmin, 0.0);
-  double t_end = tmax;
+  const auto t_start = std::max(tmin, 0.0);
+  const auto t_end = tmax;
 
   spdlog::trace(
     "Integrating from t_start={:.4f} to t_end={:.4f} across image boundaries.", t_start, t_end
@@ -224,8 +234,8 @@ auto Simulation::traceRay(const glm::dvec2& startPoint, const glm::dvec2& direct
     double remaining = t_end - (t_start + (step * delta_t));
     if (remaining > 0.0) {
       glm::dvec2 p = startPoint + t * direction;
-      int x = static_cast<int>(std::floor(p.x));
-      int y = static_cast<int>(std::floor(p.y));
+      const auto x = static_cast<int32_t>(std::floor(p.x));
+      const auto y = static_cast<int32_t>(std::floor(p.y));
 
       if (x >= 0 && x < static_cast<int>(m_imageSize) && y >= 0
           && y < static_cast<int>(m_imageSize))
