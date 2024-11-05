@@ -1,8 +1,16 @@
 #pragma once
+/**
+ * @file PostProcessing.hpp
+ * @brief This file contains the declaration of the PostProcessing class.
+ */
 
 #include <opencv2/opencv.hpp>
 #include <string>
 
+/**
+ * @class PostProcessing
+ * @brief This class provides post-processing functionality for OpenCV images.
+ */
 class PostProcessing {
   public:
     /**

@@ -15,3 +15,11 @@ const cv::Mat& SimulationResult::getImage() const noexcept {
 const cv::Mat& SimulationResult::getProjections() const noexcept {
     return m_projections;
 }
+
+cv::Mat& SimulationResult::getMutImage() noexcept {
+    return m_image;
+}
+
+cv::Mat& SimulationResult::getMutProjections() noexcept {
+    return m_projections;
+}

@@ -1,9 +1,16 @@
-#ifndef _CT_RAY_SIM__SIM__DENSITY_MAP_H
-#define _CT_RAY_SIM__SIM__DENSITY_MAP_H
+#pragma once
+/**
+ * @file DensityMap.hpp
+ * @brief This file contains the declaration of the DensityMap class.
+ */
 
 #include <opencv2/opencv.hpp>
 #include <string>
 
+/**
+ * @class DensityMap
+ * @brief This class represents a density map for CT ray simulation.
+ */
 class DensityMap {
   public:
     /**
@@ -61,5 +68,3 @@ class DensityMap {
     cv::Mat m_densityMap;
     std::size_t m_imageSize;
 };
-
-#endif  // _CT_RAY_SIM__SIM__DENSITY_MAP_H

@@ -1,8 +1,16 @@
 #pragma once
+/**
+ * @file SimulationResult.hpp
+ * @brief This file contains the declaration of the SimulationResult class.
+ */
 
 #include <memory>
 #include <opencv2/opencv.hpp>
 
+/**
+ * @class SimulationResult
+ * @brief This class represents the result of a CT simulation.
+ */
 class SimulationResult {
   public:
     /**

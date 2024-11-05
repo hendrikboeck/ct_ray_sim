@@ -1,7 +1,15 @@
 #pragma once
+/**
+ * @file Ray.hpp
+ * @brief This file defines the Ray class.
+ */
 
 #include <glm/glm.hpp>
 
+/**
+ * @class Ray
+ * @brief Represents a ray with an origin, direction, and length.
+ */
 class Ray {
   public:
     /**

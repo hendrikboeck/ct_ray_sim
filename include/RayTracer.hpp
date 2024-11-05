@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file RayTracer.hpp
+ * @brief This file defines the RayTracer class.
+ */
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -6,6 +10,10 @@
 #include "DensityMap.hpp"
 #include "Ray.hpp"
 
+/**
+ * @class RayTracer
+ * @brief Traces rays through a density map and calculates the total density.
+ */
 class RayTracer {
   public:
     /**

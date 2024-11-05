@@ -1,3 +1,8 @@
+/**
+ * @file Main.cpp
+ * @brief Entry point for the CT Ray Simulation application.
+ */
+
 #include <spdlog/spdlog.h>
 
 #include <argparse/argparse.hpp>
@@ -11,11 +16,27 @@
 using std::size_t;
 namespace fs = std::filesystem;
 
-struct CLIArguments {
+/**
+ * @class CLIArguments
+ * @brief Structure to hold command-line arguments for the CT ray simulation.
+ */
+class CLIArguments {
+  public:
     std::string inputPath;
     std::string outputPath;
     size_t angles;
 
+    /**
+     * @brief Parses command-line arguments and returns a CLIArguments instance.
+     *
+     * This function utilizes the argparse library to define and parse the required
+     * and optional command-line arguments. It handles parsing errors by logging
+     * an error message and terminating the program.
+     *
+     * @param argc Argument count.
+     * @param argv Argument vector.
+     * @return Parsed CLIArguments with inputPath, outputPath, and angles.
+     */
     static CLIArguments parse(int argc, char* argv[]) {
         auto program = argparse::ArgumentParser("ct_ray_sim");
 
@@ -44,6 +65,12 @@ struct CLIArguments {
     }
 };
 
+/**
+ * @brief Sets up the logging configuration based on the active logging level.
+ *
+ * If the logging level includes DEBUG, it sets the logger to DEBUG level
+ * and logs a debug message indicating that the simulation is running in debug mode.
+ */
 void setupLogger() {
     if (SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_DEBUG) {
         spdlog::set_level(spdlog::level::debug);
@@ -51,6 +78,17 @@ void setupLogger() {
     }
 }
 
+/**
+ * @brief The main entry point of the CT ray simulation program.
+ *
+ * This function initializes the logger, parses command-line arguments,
+ * sets up the simulation, performs CT simulation, handles output directory creation,
+ * post-processes the simulation results, and saves the output images.
+ *
+ * @param argc Argument count.
+ * @param argv Argument vector.
+ * @return int Exit status code.
+ */
 int32_t main(int32_t argc, char* argv[]) {
     setupLogger();
     const auto args = CLIArguments::parse(argc, argv);
@@ -75,6 +113,7 @@ int32_t main(int32_t argc, char* argv[]) {
     }
 
     PostProcessing(res.getProjections())
+        .normalize()
         .to8U()
         .saveImage(fs::path(args.outputPath) / "projections.png");
 

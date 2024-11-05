@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file Simulation.hpp
+ * @brief This file contains the declaration of the Simulation class.
+ */
 
 #include <memory>
 #include <opencv2/opencv.hpp>
@@ -8,6 +12,10 @@
 #include "RayTracer.hpp"
 #include "SimulationResult.hpp"
 
+/**
+ * @class Simulation
+ * @brief This class represents a CT simulation. It uses a density map to simulate CT objects.
+ */
 class Simulation {
   public:
     /**
