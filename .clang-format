@@ -1,10 +1,12 @@
 # We'll use defaults from the LLVM style, but with 4 columns indentation.
 BasedOnStyle: Google
-IndentWidth: 2
+# IndentWidth: 2
+IndentWidth: 4
 
 Language: Cpp
 ColumnLimit: 100
-ContinuationIndentWidth: 2
+# ContinuationIndentWidth: 2
+# ContinuationIndentWidth: 4
 AccessModifierOffset: -2
 AlignAfterOpenBracket: BlockIndent # AlwaysBreak
 #AlignAfterOpenBracket: AlwaysBreak
@@ -44,7 +46,7 @@ AlwaysBreakAfterDefinitionReturnType: None # deprecated
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: Yes
-AttributeMacros: ['LUTHOR_NODISCARD']
+# AttributeMacros: [ 'LUTHOR_NODISCARD' ]
 BinPackArguments: false
 BinPackParameters: false
 BitFieldColonSpacing: Both
@@ -153,5 +155,6 @@ SpacesInLineCommentPrefix:
 #   InEmptyParentheses: false
 #   Other: false
 Standard: Latest
-TabWidth: 2
+TabWidth: 4
+
 # VerilogBreakBetweenInstancePorts: false

@@ -6,11 +6,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
-add_executable(ct_ray_sim
-    ${CMAKE_SOURCE_DIR}/src/ct_sim.cpp
-    ${CMAKE_SOURCE_DIR}/src/main.cpp
-)
 include_directories(${CMAKE_SOURCE_DIR}/include)
+add_executable(ct_ray_sim
+    ${CMAKE_SOURCE_DIR}/src/DensityMap.cpp
+    ${CMAKE_SOURCE_DIR}/src/Main.cpp
+    ${CMAKE_SOURCE_DIR}/src/PostProcessing.cpp
+    ${CMAKE_SOURCE_DIR}/src/Ray.cpp
+    ${CMAKE_SOURCE_DIR}/src/RayTracer.cpp
+    ${CMAKE_SOURCE_DIR}/src/Simulation.cpp
+    ${CMAKE_SOURCE_DIR}/src/SimulationResult.cpp
+)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(ct_ray_sim PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
 else()
