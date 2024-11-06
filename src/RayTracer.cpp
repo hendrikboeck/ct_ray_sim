@@ -122,13 +122,12 @@ double RayTracer::traceRay(const Ray& ray) const {
         "Integrating from tStart={:.4f} to tEnd={:.4f} across image boundaries.", tStart, tEnd
     );
 
-    const auto delta_t = 0.5;
-    auto step = 0;
-    spdlog::trace("using delta_t={:.4f} for integration.", delta_t);
+    const auto deltaT = 0.5;
+    spdlog::trace("using deltaT={:.4f} for integration.", deltaT);
 
     double totalDensity = 0.0;
 
-    for (auto t = tStart; t < tEnd; t += delta_t, step++) {
+    for (auto t = tStart; t < tEnd; t += deltaT) {
         const auto p = origin + t * direction;
 
         const auto x = static_cast<size_t>(std::floor(p.x));
@@ -137,12 +136,12 @@ double RayTracer::traceRay(const Ray& ray) const {
         // if (x >= 0 && x < imageSize && y >= 0 && y < imageSize) {
         if (x < imageSize && y < imageSize) {
             const auto density = m_densityMap.getDensity(x, y);
-            totalDensity += density * delta_t;
+            totalDensity += density * deltaT;
             spdlog::trace(
                 "Accumulated density: {:.4f} * {:.4f} = {:.4f}, Total Density: {:.4f}",
                 density,
-                delta_t,
-                density * delta_t,
+                deltaT,
+                density * deltaT,
                 totalDensity
             );
         }
