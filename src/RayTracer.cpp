@@ -54,7 +54,7 @@ vector<Ray> RayTracer::setupRays(const double phi, const size_t numRays) const {
     rays.reserve(numRays);
 
     for (size_t i = 0; i < numRays; ++i) {
-        const auto origin = tangentCenter + tangentDirection * (i * stepSize - radius);
+        const auto origin = tangentCenter + tangentDirection * ((i + 0.5) * stepSize - radius);
         rays.push_back(Ray(origin, direction, imageSize));
     }
 
