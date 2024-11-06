@@ -54,7 +54,7 @@ cv::Mat Simulation::backProject(const cv::Mat& projections) const {
     auto reconstructedImage = cv::Mat(imageSize, imageSize, CV_64F, cv::Scalar(0));
 
     const auto center = static_cast<double>(imageSize) / 2.0;
-    const auto numAngles = projections.cols;
+    const auto numAngles = static_cast<size_t>(projections.cols);
 
     for (size_t i = 0; i < numAngles; i++) {
         const auto phi = radians(static_cast<double>(i) * (360.0 / numAngles));
