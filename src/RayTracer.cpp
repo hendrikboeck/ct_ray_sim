@@ -77,55 +77,49 @@ double RayTracer::traceRay(const Ray& ray) const {
     );
 
     const auto imageSize = m_densityMap.getSize();
+    const auto scanField = cv::Rect2d(0, 0, imageSize, imageSize);
 
-    auto tmin = -numeric_limits<double>::infinity();
-    auto tmax = numeric_limits<double>::infinity();
-
-    const auto xmin = 0.0;
-    const auto xmax = static_cast<double>(imageSize);
-    const auto ymin = 0.0;
-    const auto ymax = static_cast<double>(imageSize);
+    auto tEntry = -numeric_limits<double>::infinity();
+    auto tExit = numeric_limits<double>::infinity();
 
     if (direction.x != 0.0) {
-        const auto tx1 = (xmin - origin.x) / direction.x;
-        const auto tx2 = (xmax - origin.x) / direction.x;
-        const auto tmin_x = min(tx1, tx2);
-        const auto tmax_x = max(tx1, tx2);
+        const auto tAtXMin = (scanField.x - origin.x) / direction.x;
+        const auto tAtXMax = (scanField.width - origin.x) / direction.x;
+        const auto tEntryX = min(tAtXMin, tAtXMax);
+        const auto tExitX = max(tAtXMin, tAtXMax);
 
-        tmin = max(tmin, tmin_x);
-        tmax = min(tmax, tmax_x);
+        tEntry = max(tEntry, tEntryX);
+        tExit = min(tExit, tExitX);
     }
-
-    else if (origin.x < xmin || origin.x > xmax) {
+    else if (origin.x < scanField.x || origin.x > scanField.width) {
         spdlog::trace("Ray is parallel to x-axis and outside image bounds. Returning 0.0");
         return 0.0;
     }
 
     if (direction.y != 0.0) {
-        const auto ty1 = (ymin - origin.y) / direction.y;
-        const auto ty2 = (ymax - origin.y) / direction.y;
-        const auto tmin_y = min(ty1, ty2);
-        const auto tmax_y = max(ty1, ty2);
+        const auto tAtYMin = (scanField.y - origin.y) / direction.y;
+        const auto tAtYMax = (scanField.height - origin.y) / direction.y;
+        const auto tEntryY = min(tAtYMin, tAtYMax);
+        const auto tExitY = max(tAtYMin, tAtYMax);
 
-        tmin = max(tmin, tmin_y);
-        tmax = min(tmax, tmax_y);
+        tEntry = max(tEntry, tEntryY);
+        tExit = min(tExit, tExitY);
     }
-
-    else if (origin.y < ymin || origin.y > ymax) {
+    else if (origin.y < scanField.y || origin.y > scanField.height) {
         spdlog::trace("Ray is parallel to y-axis and outside image bounds. Returning 0.0");
         return 0.0;
     }
 
-    if (tmax < tmin || tmax < 0.0) {
+    if (tExit < tEntry || tExit < 0.0) {
         spdlog::trace("No valid intersection with image boundaries. Returning 0.0");
         return 0.0;
     }
 
-    const auto t_start = max(tmin, 0.0);
-    const auto t_end = tmax;
+    const auto tStart = max(tEntry, 0.0);
+    const auto tEnd = tExit;
 
     spdlog::trace(
-        "Integrating from t_start={:.4f} to t_end={:.4f} across image boundaries.", t_start, t_end
+        "Integrating from tStart={:.4f} to tEnd={:.4f} across image boundaries.", tStart, tEnd
     );
 
     const auto delta_t = 0.5;
@@ -134,13 +128,14 @@ double RayTracer::traceRay(const Ray& ray) const {
 
     double totalDensity = 0.0;
 
-    for (auto t = t_start; t < t_end; t += delta_t, step++) {
+    for (auto t = tStart; t < tEnd; t += delta_t, step++) {
         const auto p = origin + t * direction;
 
         const auto x = static_cast<size_t>(std::floor(p.x));
         const auto y = static_cast<size_t>(std::floor(p.y));
 
-        if (x >= 0 && x < imageSize && y >= 0 && y < imageSize) {
+        // if (x >= 0 && x < imageSize && y >= 0 && y < imageSize) {
+        if (x < imageSize && y < imageSize) {
             const auto density = m_densityMap.getDensity(x, y);
             totalDensity += density * delta_t;
             spdlog::trace(
