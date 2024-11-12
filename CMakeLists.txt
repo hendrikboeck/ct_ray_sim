@@ -1,12 +1,21 @@
 cmake_minimum_required(VERSION 3.10)
 project(ct_ray_sim VERSION 0.1.0)
 
+include(FetchContent)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/build/_deps/glm-src
+    ${CMAKE_SOURCE_DIR}/build/_deps/opencv-src/include
+    ${CMAKE_SOURCE_DIR}/build/_deps/spdlog-src/include
+    ${CMAKE_SOURCE_DIR}/build/_deps/argparse-src/include
+    ${CMAKE_SOURCE_DIR}/build/_deps/fmt-src/include
+)
 add_executable(ct_ray_sim
     ${CMAKE_SOURCE_DIR}/src/DensityMap.cpp
     ${CMAKE_SOURCE_DIR}/src/Main.cpp
@@ -16,6 +25,7 @@ add_executable(ct_ray_sim
     ${CMAKE_SOURCE_DIR}/src/Simulation.cpp
     ${CMAKE_SOURCE_DIR}/src/SimulationResult.cpp
 )
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(ct_ray_sim PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
 else()
@@ -25,65 +35,54 @@ endif()
 # ----------------------------------
 # glm
 # ----------------------------------
-find_package(glm)
-
-if(glm_FOUND)
-    message(STATUS "Found glm version ${glm_VERSION}")
-    include_directories(${glm_INCLUDE_DIRS})
-    target_link_libraries(ct_ray_sim glm::glm)
-else()
-    message(FATAL_ERROR "glm not found. Please install glm.")
-endif()
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 1.0.1
+)
+FetchContent_MakeAvailable(glm)
+target_link_libraries(ct_ray_sim glm::glm)
 
 # ----------------------------------
 # opencv
 # ----------------------------------
-find_package(OpenCV REQUIRED)
-
-if(OpenCV_FOUND)
-    message(STATUS "Found OpenCV version ${OpenCV_VERSION}")
-    include_directories(${OpenCV_INCLUDE_DIRS})
-    target_link_libraries(ct_ray_sim ${OpenCV_LIBS})
-else()
-    message(FATAL_ERROR "OpenCV not found. Please install OpenCV.")
-endif()
+FetchContent_Declare(
+    opencv
+    GIT_REPOSITORY https://github.com/opencv/opencv.git
+    GIT_TAG 4.10.0
+)
+FetchContent_MakeAvailable(opencv)
+target_link_libraries(ct_ray_sim opencv_core opencv_imgproc opencv_highgui)
 
 # ----------------------------------
 # spdlog
 # ----------------------------------
-find_package(spdlog REQUIRED)
-
-if(spdlog_FOUND)
-    message(STATUS "Found spdlog version ${spdlog_VERSION}")
-    include_directories(${spdlog_INCLUDE_DIRS})
-    target_compile_definitions(ct_ray_sim PRIVATE SPDLOG_FMT_EXTERNAL)
-    target_link_libraries(ct_ray_sim spdlog::spdlog)
-else()
-    message(FATAL_ERROR "spdlog not found. Please install spdlog.")
-endif()
+FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG v1.14.1
+)
+FetchContent_MakeAvailable(spdlog)
+target_link_libraries(ct_ray_sim spdlog::spdlog)
 
 # ----------------------------------
 # argparse
 # ----------------------------------
-find_package(argparse REQUIRED)
-
-if(argparse_FOUND)
-    message(STATUS "Found argparse version ${argparse_VERSION}")
-    include_directories(${argparse_INCLUDE_DIRS})
-    target_link_libraries(ct_ray_sim argparse::argparse)
-else()
-    message(FATAL_ERROR "argparse not found. Please install argparse.")
-endif()
+FetchContent_Declare(
+    argparse
+    GIT_REPOSITORY https://github.com/p-ranav/argparse.git
+    GIT_TAG v3.1
+)
+FetchContent_MakeAvailable(argparse)
+target_link_libraries(ct_ray_sim argparse::argparse)
 
 # ----------------------------------
 # fmt
 # ----------------------------------
-find_package(fmt REQUIRED)
-
-if(fmt_FOUND)
-    message(STATUS "Found fmt version ${fmt_VERSION}")
-    include_directories(${fmt_INCLUDE_DIRS})
-    target_link_libraries(ct_ray_sim fmt::fmt)
-else()
-    message(FATAL_ERROR "fmt not found. Please install fmt.")
-endif()
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 11.0.2
+)
+FetchContent_MakeAvailable(fmt)
+target_link_libraries(ct_ray_sim fmt::fmt)
