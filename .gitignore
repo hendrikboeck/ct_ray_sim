@@ -52,16 +52,20 @@ _deps
 # External projects
 *-prefix/
 
-# End of https://www.toptal.com/developers/gitignore/api/cmake,c++
 build
 .vscode/**
-!./.vscode/settings.json
 .ignore
 output
-vcpkg
-
 CMakeLists.txt
+debug_density_map.png
+
+# Bootstrap Vcpkg
+./vcpkg
 
 # Bootstrap Nix
 .envrc
 shell.nix
+
+# Keep Always
+!.vscode/settings.json
+!scripts/resources/**
