@@ -60,14 +60,14 @@ class PostProcessing {
     PostProcessing& to16U();
 
     /**
-     * @brief Returns the processed image.
+     * @brief Returns the processed image as a const reference.
      *
      * @return The processed image.
      */
     const cv::Mat& getRef() const;
 
     /**
-     * @brief Returns the processed image.
+     * @brief Returns the processed image as a copy.
      *
      * @return The processed image.
      */

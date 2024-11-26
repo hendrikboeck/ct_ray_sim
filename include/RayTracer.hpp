@@ -42,11 +42,14 @@ class RayTracer {
     RayTracer& operator=(RayTracer&&) noexcept = default;
 
     /**
-     * @brief Sets up rays for the specified angle.
+     * @brief Sets up rays for the specified angle. The number of rays is specified by the numRays
+     * parameter. The rays will be distributed equaly along the tangent at the angle phi. The
+     * tangent will be of length equal to the size of the density map. The tangent will be centered
+     * at the angle phi. Rays originate from the center of a simulated detector.
      *
      * @param phi The angle in radians.
      * @param numRays The number of rays to set up.
-     * @return A vector of rays.
+     * @return The vector of calculated rays. (directions are normalized)
      */
     std::vector<Ray> setupRays(const double phi, const std::size_t numRays) const;
 

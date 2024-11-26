@@ -13,22 +13,24 @@
 class Ray {
   public:
     /**
-     * @brief Constructs a Ray object with the provided origin, direction, and length.
+     * @brief Constructs a Ray object with the provided origin and direction vectors and length of
+     * the ray. Direction vector should be normalized.
      *
      * @param origin The origin of the ray.
-     * @param direction The direction of the ray.
+     * @param direction The direction of the ray. Should be normalized.
      * @param length The length of the ray.
      */
     Ray(const glm::dvec2& origin, const glm::dvec2& direction, std::size_t length);
 
     /**
-     * @brief Constructs a Ray object with the provided origin, direction, and length.
+     * @brief Constructs a Ray object with the provided origin and direction vectors and length of
+     * the ray. Direction vector should be normalized.
      *
      * This constructor is useful when you want to transfer ownership of the origin and direction
      * without copying, which can improve performance.
      *
      * @param origin The origin of the ray.
-     * @param direction The direction of the ray.
+     * @param direction The direction of the ray. Should be normalized.
      * @param length The length of the ray.
      */
     Ray(glm::dvec2&& origin, glm::dvec2&& direction, std::size_t length);
