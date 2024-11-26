@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Default action if no options are provided
 DEFAULT_OPTION="--nix"
@@ -7,7 +7,9 @@ DEFAULT_OPTION="--nix"
 case "$1" in
     --nix)
         echo "Setting up Nix environment..."
-        cp scripts/resources/nix/* ./
+        cp scripts/resources/nix/.envrc ./
+        cp scripts/resources/nix/shell.nix ./
+        cp scripts/resources/nix/CMakeLists.txt ./
         direnv allow .
         ;;
     --vcpkg)
