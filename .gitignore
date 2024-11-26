@@ -54,8 +54,14 @@ _deps
 
 # End of https://www.toptal.com/developers/gitignore/api/cmake,c++
 build
-!.vscode/c_cpp_properties.json
-!.vscode/settings.json
-.ignore
-output
+./.vscode
+!./.vscode/settings.json
+./.ignore
+./output
 ./vcpkg
+
+./CMakeLists.txt
+
+# Bootstrap Nix
+./.envrc
+./shell.nix
