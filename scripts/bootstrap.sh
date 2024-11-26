@@ -15,10 +15,9 @@ case "$1" in
     --vcpkg)
         echo "Setting up using vcpkg..."
         cp scripts/resources/vcpkg/CMakeLists.txt ./
-        git clone https://github.com/microsoft/vcpkg.git vcpkg
-        cd vcpkg
-        ./bootstrap-vcpkg.sh
-        cd ..
+        cp scripts/resources/vcpkg/c_cpp_properties.json .vscode/
+        git clone --depth=1 https://github.com/microsoft/vcpkg.git vcpkg
+        vcpkg/bootstrap-vcpkg.sh
         vcpkg/vcpkg install opencv4 glm spdlog fmt argparse
         ;;
     --fromSource)

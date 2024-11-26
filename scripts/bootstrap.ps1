@@ -10,7 +10,8 @@ switch ($Option) {
     "--vcpkg" {
         Write-Output "Setting up using vcpkg..."
         Copy-Item -Path "scripts/resources/vcpkg/CMakeLists.txt" -Destination "./"
-        git clone https://github.com/microsoft/vcpkg.git vcpkg
+        Copy-Item -Path "scripts/resources/vcpkg/c_cpp_properties.json" -Destination ".vscode/" -Force
+        git clone --depth=1 https://github.com/microsoft/vcpkg.git vcpkg
         cd vcpkg
         .\bootstrap-vcpkg.bat
         cd ..

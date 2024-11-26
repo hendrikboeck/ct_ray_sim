@@ -48,7 +48,7 @@ class CLIArguments {
 
         program.add_argument("--angles")
             .help("Number of angles for simulation.")
-            .default_value(512)
+            .default_value(32)
             .scan<'i', size_t>();
 
         try {

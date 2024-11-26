@@ -17,8 +17,9 @@ if OPTION=="--help" (
 
 if "%OPTION%"=="--vcpkg" (
     echo Setting up using vcpkg...
+    copy "scripts\resources\vcpkg\c_cpp_properties.json" .vscode\
     copy "scripts\resources\vcpkg\CMakeLists.txt" .\
-    git clone https://github.com/microsoft/vcpkg.git vcpkg
+    git clone --depth=1 https://github.com/microsoft/vcpkg.git vcpkg
     cd vcpkg
     bootstrap-vcpkg.bat
     cd ..

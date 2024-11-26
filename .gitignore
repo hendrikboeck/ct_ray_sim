@@ -60,7 +60,7 @@ CMakeLists.txt
 debug_density_map.png
 
 # Bootstrap Vcpkg
-./vcpkg
+vcpkg
 
 # Bootstrap Nix
 .envrc
