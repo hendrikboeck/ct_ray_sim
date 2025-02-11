@@ -77,7 +77,7 @@ double RayTracer::traceRay(const Ray& ray) const {
     );
 
     const auto imageSize = m_densityMap.getSize();
-    const auto scanField = cv::Rect2d(0, 0, imageSize, imageSize);
+    const auto scanField = cv::Rect(0, 0, imageSize, imageSize);
 
     auto tEntry = -numeric_limits<double>::infinity();
     auto tExit = numeric_limits<double>::infinity();

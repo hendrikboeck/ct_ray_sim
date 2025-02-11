@@ -58,9 +58,12 @@ build
 output
 CMakeLists.txt
 debug_density_map.png
+.xmake
+xmake.lua
 
 # Bootstrap Vcpkg
 vcpkg
+.env
 
 # Bootstrap Nix
 .envrc

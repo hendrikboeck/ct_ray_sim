@@ -46,6 +46,16 @@ target_link_libraries(ct_ray_sim glm::glm)
 # ----------------------------------
 # opencv
 # ----------------------------------
+# Configure OpenCV build options for a minimal C++ only build
+set(BUILD_LIST "core,imgproc,imgcodecs" CACHE STRING "List of OpenCV modules to build")
+set(BUILD_JAVA OFF CACHE BOOL "Disable Java support")
+set(BUILD_opencv_python2 OFF CACHE BOOL "Disable Python 2 bindings")
+set(BUILD_opencv_python3 OFF CACHE BOOL "Disable Python 3 bindings")
+set(BUILD_TESTS OFF CACHE BOOL "Disable tests")
+set(BUILD_PERF_TESTS OFF CACHE BOOL "Disable performance tests")
+set(BUILD_EXAMPLES OFF CACHE BOOL "Disable examples")
+
+# Fetch and make OpenCV available
 FetchContent_Declare(
     opencv
     GIT_REPOSITORY https://github.com/opencv/opencv.git
@@ -79,6 +89,11 @@ target_link_libraries(ct_ray_sim argparse::argparse)
 # ----------------------------------
 # fmt
 # ----------------------------------
+# fmt build options
+set(FMT_DOC OFF CACHE INTERNAL "")
+set(FMT_TEST OFF CACHE INTERNAL "")
+
+# Fetch and make fmt available
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
